@@ -23,25 +23,20 @@ local Window = Fluent:CreateWindow({
     MinimizeKey = Enum.KeyCode.LeftControl
 })
 
---// TABS (TODAS AS SUAS ORIGINAIS)
+--// TABS
 local Tabs = {
     Home = Window:AddTab({ Title = "Home", Icon = "home" }),
-    Main = Window:AddTab({ Title = "Main", Icon = "layout-grid" }),
-    Player = Window:AddTab({ Title = "Player", Icon = "user" }),
-    World = Window:AddTab({ Title = "World", Icon = "globe" }),
-    Tools = Window:AddTab({ Title = "Tools", Icon = "wrench" }),
     Visuals = Window:AddTab({ Title = "Visuals", Icon = "eye" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
-    Credits = Window:AddTab({ Title = "Credits", Icon = "info" })
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
 }
 
---// HOME (SÓ INFO BÁSICA)
+--// HOME
 Tabs.Home:AddParagraph({
     Title = "Ryvex Hub",
     Content = "Sistema carregado com sucesso"
 })
 
---// ESP SYSTEM
+--// ESP FUNCTION
 local function createHighlight(character)
     if not character then return end
     if character:FindFirstChild("RyvexHighlight") then return end
@@ -50,7 +45,7 @@ local function createHighlight(character)
     highlight.Name = "RyvexHighlight"
     highlight.Adornee = character
     highlight.FillColor = ESPColor
-    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.OutlineColor = Color3.fromRGB(255,255,255)
     highlight.FillTransparency = 0.5
     highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
     highlight.Parent = character
@@ -60,46 +55,47 @@ local function removeHighlight(character)
     if not character then return end
 
     local h = character:FindFirstChild("RyvexHighlight")
-    if h then
-        h:Destroy()
-    end
+    if h then h:Destroy() end
 end
 
-local function updateESP()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            local char = player.Character
+--// LOOP ESP (OTIMIZADO)
+task.spawn(function()
+    while true do
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                local char = player.Character
 
-            if char then
-                if ESPEnabled then
-                    createHighlight(char)
-                else
-                    removeHighlight(char)
+                if char then
+                    if ESPEnabled then
+                        createHighlight(char)
+                    else
+                        removeHighlight(char)
+                    end
                 end
             end
         end
+        task.wait(0.2)
     end
-end
+end)
 
-RunService.RenderStepped:Connect(updateESP)
-
+--// AUTO RESPWAN SUPPORT
 Players.PlayerAdded:Connect(function(player)
     player.CharacterAdded:Connect(function(char)
+        task.wait(1)
         if ESPEnabled then
-            task.wait(1)
             createHighlight(char)
         end
     end)
 end)
 
---// VISUALS TAB
+--// UI CONTROLS
 local ESPToggle = Tabs.Visuals:AddToggle("ESP", {
     Title = "ESP Highlight",
     Default = false
 })
 
-ESPToggle:OnChanged(function(value)
-    ESPEnabled = value
+ESPToggle:OnChanged(function(v)
+    ESPEnabled = v
 end)
 
 local ColorPicker = Tabs.Visuals:AddColorpicker("ESPColor", {
@@ -107,8 +103,8 @@ local ColorPicker = Tabs.Visuals:AddColorpicker("ESPColor", {
     Default = ESPColor
 })
 
-ColorPicker:OnChanged(function(value)
-    ESPColor = value
+ColorPicker:OnChanged(function(v)
+    ESPColor = v
 end)
 
 --// NOTIFY
