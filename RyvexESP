@@ -1,1 +1,65 @@
+local module = {}
 
+function module.Init(Fluent, ESP)
+    
+    --// WINDOW
+    local Window = Fluent:CreateWindow({
+        Title = "Ryvex Hub",
+        SubTitle = "by JH",
+        TabWidth = 160,
+        Size = UDim2.fromOffset(580, 460),
+        Acrylic = true,
+        Theme = "Dark",
+        MinimizeKey = Enum.KeyCode.LeftControl
+    })
+
+    --// TABS
+    local Tabs = {
+        Visuals = Window:AddTab({ Title = "Visuals", Icon = "eye" }),
+        Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+    }
+
+    --// VISUALS TAB
+    Tabs.Visuals:AddParagraph({
+        Title = "ESP System",
+        Content = "Controle do ESP em tempo real"
+    })
+
+    -- ESP TOGGLE
+    Tabs.Visuals:AddToggle("ESP_Toggle", {
+        Title = "ESP",
+        Default = false
+    }):OnChanged(function(value)
+        ESP.SetEnabled(value)
+    end)
+
+    -- TEAM CHECK
+    Tabs.Visuals:AddToggle("TeamCheck_Toggle", {
+        Title = "Team Check",
+        Default = false
+    }):OnChanged(function(value)
+        ESP.SetTeamCheck(value)
+    end)
+
+    -- RAINBOW
+    Tabs.Visuals:AddToggle("Rainbow_Toggle", {
+        Title = "Rainbow ESP",
+        Default = false
+    }):OnChanged(function(value)
+        ESP.SetRainbow(value)
+    end)
+
+    --// NOTIFY
+    Fluent:Notify({
+        Title = "Ryvex Hub",
+        Content = "UI carregada com sucesso!",
+        Duration = 5
+    })
+
+    return {
+        Window = Window,
+        Tabs = Tabs
+    }
+end
+
+return module
