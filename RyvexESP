@@ -1,1 +1,103 @@
+local module = {}
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+--// SETTINGS
+local Enabled = false
+local TeamCheck = false
+local Rainbow = false
+
+--// CONTROLES EXTERNOS
+function module.SetEnabled(v)
+    Enabled = v
+end
+
+function module.SetTeamCheck(v)
+    TeamCheck = v
+end
+
+function module.SetRainbow(v)
+    Rainbow = v
+end
+
+--// COLOR SYSTEM
+local function getColor()
+    if Rainbow then
+        return Color3.fromHSV(tick() % 5 / 5, 1, 1)
+    end
+    return Color3.fromRGB(255, 0, 0)
+end
+
+--// CREATE ESP
+local function createESP(char)
+    if not char then return end
+
+    if char:FindFirstChild("RyvexESP") then return end
+
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "RyvexESP"
+    highlight.Adornee = char
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.FillTransparency = 0.4
+    highlight.OutlineTransparency = 0
+    highlight.FillColor = getColor()
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.Parent = char
+end
+
+--// REMOVE ESP
+local function removeESP(char)
+    if not char then return end
+
+    local esp = char:FindFirstChild("RyvexESP")
+    if esp then
+        esp:Destroy()
+    end
+end
+
+--// MAIN LOOP
+local function update()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+
+            local char = player.Character
+
+            if char then
+                if TeamCheck and player.Team == LocalPlayer.Team then
+                    removeESP(char)
+                else
+                    if Enabled then
+                        createESP(char)
+                    else
+                        removeESP(char)
+                    end
+                end
+            end
+        end
+    end
+end
+
+--// INIT
+function module.Init()
+    task.spawn(function()
+        while true do
+            update()
+            task.wait(0.2)
+        end
+    end)
+
+    -- respawn support
+    Players.PlayerAdded:Connect(function(player)
+        player.CharacterAdded:Connect(function(char)
+            task.wait(1)
+
+            if Enabled then
+                createESP(char)
+            end
+        end)
+    end)
+end
+
+return module
